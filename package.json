@@ -1,0 +1,23 @@
+{
+    "name": "agendclean",
+    "version": "1.0.0",
+    "description": "Sistema de agendamento inteligente para clínicas e escritórios",
+    "main": "index.js",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "start": "vite preview"
+    },
+    "keywords": [],
+    "author": "Code Company",
+    "license": "MIT",
+    "devDependencies": {
+        "vite": "^5.0.0"
+    },
+    "dependencies": {
+        "@fullcalendar/common": "^5.11.5",
+        "@fullcalendar/core": "^6.1.19",
+        "@fullcalendar/daygrid": "^6.1.19",
+        "fullcalendar": "^6.1.19"
+    }
+}

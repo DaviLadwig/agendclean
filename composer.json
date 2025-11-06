@@ -1,0 +1,23 @@
+{
+    "name": "codecompany/agendamento-ia",
+    "description": "Sistema inteligente de agendamentos para clínicas e escritórios.",
+    "type": "project",
+    "require": {
+      "php": ">=8.0",
+      "ext-pdo": "*"
+    },
+    "autoload": {
+      "psr-4": {
+        "App\\": "src/"
+      }
+    },
+    "authors": [
+      {
+        "name": "Davi Ladwig",
+        "email": "seuemail@exemplo.com"
+      }
+    ],
+    "minimum-stability": "stable",
+    "license": "MIT"
+  }
+  

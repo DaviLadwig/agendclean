@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgendClean</title>
+    <link rel="stylesheet" href="src/css/style.css" />
+
+    <!--calendar-->
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.19/main.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.19/main.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.19/main.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/list@6.1.19/main.min.css" rel="stylesheet" />
+
+</head>
+
+<body>
+    <header>
+        <img src="src/images/AGENDC-removebg-preview.png" alt="logo agendclean png" width="300px">
+        <nav>
+            <ul>
+                <li><a href="#" class="active">Início</a></li>
+                <li><a href="#">Agendamentos</a></li>
+                <li><a href="#">Clientes</a></li>
+                <li><a href="#">Configurações</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="calendar-section">
+            <h2>Calendário de Agendamentos</h2>
+            <div id="calendar"></div>
+
+            
+            <!-- Modal de agendamento -->
+            <div id="event-modal" class="modal">
+                <div class="modal-content">
+                    <span id="close-modal" class="close">&times;</span>
+                    <h2>Novo Agendamento</h2>
+
+                    <form id="event-form">
+                        <label for="event-title">Título:</label>
+                        <input type="text" id="event-title" placeholder="Ex: Reunião com cliente" required />
+
+                        <label for="event-type">Tipo:</label>
+                        <select id="event-type" required>
+                            <option value="presencial">Presencial</option>
+                            <option value="online">Online</option>
+                            <option value="reunião">Reunião</option>
+                            <option value="call">Call</option>
+                        </select>
+
+                        <label for="event-description">Descrição:</label>
+                        <textarea id="event-description" rows="3" placeholder="Detalhes do agendamento..."></textarea>
+
+                        <button type="submit">Salvar Agendamento</button>
+                    </form>
+                </div>
+            </div>
+            
+
+        </section>
+
+        <section class="form-section">
+            <h2>Novo Agendamento</h2>
+            <form id="form-agendamento">
+                <label for="nome">Nome do Cliente:</label>
+                <input type="text" id="nome" name="nome" required />
+
+                <label for="data">Data:</label>
+                <input type="date" id="data" name="data" required />
+
+                <label for="hora">Hora:</label>
+                <input type="time" id="hora" name="hora" required />
+
+                <label for="tipo">Tipo de Agendamento:</label>
+                <select id="tipo" name="tipo" required>
+                    <option value="">Selecione</option>
+                    <option value="reuniao">Reunião</option>
+                    <option value="call">Call à distância</option>
+                    <option value="presencial">Presencial</option>
+                </select>
+
+                <label for="descricao">Descrição:</label>
+                <textarea id="descricao" name="descricao" rows="3"></textarea>
+
+                <button type="submit">Salvar Agendamento</button>
+            </form>
+        </section>
+    </main>
+
+    <script type="module" src="src/js/main.js"></script>
+</body>
+
+</html>

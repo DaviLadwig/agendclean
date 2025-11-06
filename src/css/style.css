@@ -1,0 +1,182 @@
+/* ======= ESTILOS GERAIS ======= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  body {
+    background-color: #f5f7fa;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  /* ======= CABEÇALHO ======= */
+  header {
+    background: #0b1020;
+    color: #fff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  header h1 {
+    font-size: 1.6rem;
+  }
+  
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    transition: 0.3s;
+  }
+  
+  nav a:hover,
+  nav a.active {
+    color: #9ed500;
+  }
+  
+  /* ======= CONTEÚDO PRINCIPAL ======= */
+  main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 2rem;
+    justify-content: space-around;
+  }
+  
+  .calendar-section, .form-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  /* ======= FORMULÁRIO ======= */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  input, select, textarea {
+    padding: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  button {
+    background-color: #0b1020;
+    color: #fff;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  button:hover {
+    background-color: #9ed500;
+    color: #0b1020;
+  }
+  
+
+  /* ======= CALENDÁRIO ======= */
+#calendar {
+    margin-top: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .fc-daygrid-event {
+    background-color: #9ed500 !important;
+    color: #0b1020 !important;
+    border: none !important;
+    font-weight: 500;
+  }
+  
+  
+  /*========= MODAL =======*/
+  /* Modal base */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Conteúdo do modal */
+  .modal-content {
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-content h2 {
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+    color: #333;
+  }
+  
+  /* Inputs e labels */
+  .modal-content label {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .modal-content input,
+  .modal-content select,
+  .modal-content textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+  
+  /* Botão */
+  .modal-content button {
+    margin-top: 15px;
+    width: 100%;
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .modal-content button:hover {
+    background-color: #0050cc;
+  }
+  
+  /* Fechar modal */
+  .close {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
