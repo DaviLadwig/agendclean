@@ -1,155 +1,208 @@
-// Evento de envio do formulário de agendamento
-document.getElementById("form-agendamento").addEventListener("submit", (e) => {
-    e.preventDefault(); // Impede o reload da página
-  
-    // Captura os dados do formulário
-    const agendamento = {
-      nome: e.target.nome.value,
-      data: e.target.data.value,
-      hora: e.target.hora.value,
-      tipo: e.target.tipo.value,
-      descricao: e.target.descricao.value
-    };
-  
-    console.log("Novo agendamento criado:", agendamento);
-  
-    // Limpa o formulário após o envio
-    e.target.reset();
-  
-    alert("Agendamento salvo com sucesso (simulação)!");
-  });
-  
+// src/js/main.js
+import { Calendar } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import ptLocale from '@fullcalendar/core/locales/pt-br';
 
-  /*IMPORTANDO O FULLCALENDAR*/
-  // Importa os módulos do FullCalendar
-  import { Calendar } from '@fullcalendar/core';
-  import dayGridPlugin from '@fullcalendar/daygrid';
-  import timeGridPlugin from '@fullcalendar/timegrid';
-  import listPlugin from '@fullcalendar/list';
-  import interactionPlugin from '@fullcalendar/interaction';
-  import ptBrLocale from '@fullcalendar/core/locales/pt-br';
+// helper de log
+const log = (...args) => console.log('[agendclean]', ...args);
 
+document.addEventListener('DOMContentLoaded', () => {
+  log('DOM pronto — iniciando...');
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const calendarEl = document.getElementById('calendar');
-    const calendar = new Calendar(calendarEl, {
-      plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
-      initialView: 'dayGridMonth'
+  // elementos principais
+  const calendarEl = document.getElementById('calendar');
+  const modal = document.getElementById('agendamentoModal');
+  const inputData = document.getElementById('data');             // campo data (readonly)
+  const selectInicio = document.getElementById('hora-inicio');   // select de início
+  const selectFim = document.getElementById('hora-fim');         // select de término
+  const nomeInput = document.getElementById('nome');
+  const mensagemInput = document.getElementById('mensagem');
+  const btnConfirmar = document.getElementById('btn-confirmar');
+  const btnCancelar = document.getElementById('btn-cancelar');
+  const closeBtn = modal?.querySelector('.close');
+
+  if (!calendarEl) {
+    console.error('Elemento #calendar não encontrado.');
+    return;
+  }
+  if (!modal) {
+    console.error('Modal #agendamentoModal não encontrado.');
+    return;
+  }
+
+  // Gera array de horários em incrementos de 30 minutos entre startHour e endHour
+  function gerarSlots(startHour = 8, endHour = 20, stepMinutes = 30) {
+    const slots = [];
+    for (let h = startHour; h <= endHour; h++) {
+      for (let m = 0; m < 60; m += stepMinutes) {
+        const hh = String(h).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        // não incluir slots exatamente no endHour:30 se endHour==20 e step 30 (ajuste PRN)
+        if (h === endHour && m > 0) continue;
+        slots.push(`${hh}:${mm}`);
+      }
+    }
+    return slots;
+  }
+
+  // Preenche o select de hora inicial com todos os slots
+  const ALL_SLOTS = gerarSlots(8, 20, 30); // 08:00 .. 20:00 (último início 20:00)
+  function preencherInicio() {
+    selectInicio.innerHTML = '';
+    ALL_SLOTS.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      selectInicio.appendChild(opt);
     });
-    calendar.render();
-  });
-  document.addEventListener('DOMContentLoaded', function () {
-    const calendarEl = document.getElementById('calendar');
-  
-    const calendar = new Calendar(calendarEl, {
-      plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-      initialView: 'dayGridMonth',
-  
-      // 🇧🇷 Define o idioma
-      locale: ptBrLocale,
-  
-      // ⏰ Formato de hora
-      slotLabelFormat: {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      },
-  
-      // 🕐 Duração máxima de evento = 2 horas
-      selectConstraint: {
-        startTime: '08:00',
-        endTime: '20:00', // Exemplo de horário limite diário
-      },
-  
-      selectAllow: function (selectInfo) {
-        const start = selectInfo.start;
-        const end = selectInfo.end;
-  
-        // calcula diferença em horas
-        const diffInMs = end - start;
-        const diffInHours = diffInMs / (1000 * 60 * 60);
-  
-        // só permite se for até 2h
-        return diffInHours <= 2;
-      },
-  
-      // ⚡ Permite seleção de horários
-      selectable: true,
-      selectMirror: true,
-  
-      // Exemplo de callback (iremos conectar com o modal depois)
-      select: function (info) {
-        const start = info.start.toLocaleTimeString('pt-BR', {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-        const end = info.end.toLocaleTimeString('pt-BR', {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-        alert(`Evento de ${start} até ${end}`);
-      },
-    });
-  
-    calendar.render();
-  });
-  
+  }
 
-  // IDIOMA CALENDAR
-  
-  const calendar = new FullCalendar.Calendar(calendarEl, {
+  // Preenche o select de fim com as opções válidas para o início escolhido
+  // maxDurMin = 120 (2 horas)
+  function preencherFim(inicioValue, maxDurMin = 120) {
+    selectFim.innerHTML = '';
+    if (!inicioValue) return;
+    // converte hh:mm para minutos desde meia-noite
+    const [ih, im] = inicioValue.split(':').map(Number);
+    const inicioMin = ih * 60 + im;
+    // possíveis finais: a cada 30min, mínimo 30min após início, máximo inicio + maxDurMin
+    const step = 30;
+    for (let t = inicioMin + step; t <= inicioMin + maxDurMin; t += step) {
+      const fh = Math.floor(t / 60);
+      const fm = t % 60;
+      if (fh > 23) break;
+      // limite de horário de operação: não permitir fim depois de 22:00 por exemplo (opcional)
+      // if (fh > 22) break;
+      const value = `${String(fh).padStart(2,'0')}:${String(fm).padStart(2,'0')}`;
+      // só adicionar se value estiver presente na lista ALL_SLOTS ou for válido no mesmo dia
+      // (permite fins que não correspondem a início de slot, mas aqui usamos 30min step, então bate)
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = value;
+      selectFim.appendChild(opt);
+    }
+  }
+
+  // Abre o modal: seta data no campo e preenche selects
+  function abrirModal(dateStr) {
+    // dateStr vem no formato yyyy-mm-dd (ex: 2025-11-06)
+    inputData.value = new Date(dateStr).toLocaleDateString('pt-BR');
+    modal.dataset.date = dateStr; // guarda a data clicada
+    preencherInicio();
+    // define horário inicial default (próximo slot)
+    selectInicio.selectedIndex = 0;
+    preencherFim(selectInicio.value);
+    // mostra o modal (suporta .show css class)
+    modal.classList.add('show');
+    // foco no nome
+    setTimeout(() => { nomeInput?.focus(); }, 120);
+  }
+
+  // Fecha modal limpando dados
+  function fecharModal() {
+    modal.classList.remove('show');
+    formReset();
+  }
+
+  function formReset() {
+    nomeInput && (nomeInput.value = '');
+    mensagemInput && (mensagemInput.value = '');
+    selectInicio && (selectInicio.selectedIndex = 0);
+    selectFim && (selectFim.innerHTML = '');
+    delete modal.dataset.date;
+  }
+
+  // Inicializa calendar
+  const calendar = new Calendar(calendarEl, {
+    plugins: [ dayGridPlugin, interactionPlugin ],
     initialView: 'dayGridMonth',
-    locale: 'pt-br', // 🌎 idioma definido aqui
-    dateClick: function (info) {
-      console.log('Data clicada: ' + info.dateStr);
+    locale: ptLocale,
+    selectable: true,
+    height: 'auto',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,dayGridWeek'
     },
+    dateClick: function(info) {
+      log('dateClick:', info.dateStr);
+      abrirModal(info.dateStr);
+      // força atualização de tamanho (resolve encolhimento ocasional)
+      try { calendar.updateSize(); } catch(e) { /* ignore */ }
+    },
+    eventClick: function(info) {
+      // Exemplo: mostrar detalhes (pode abrir outro modal)
+      const ext = info.event.extendedProps || {};
+      alert(`Evento: ${info.event.title}\nData: ${info.event.start?.toLocaleString()}\n${ext.mensagem ? 'Motivo: '+ext.mensagem : ''}`);
+    }
+  });
+  calendar.render();
+
+  // Quando usuário muda o inicio, atualizar opções de fim
+  selectInicio.addEventListener('change', () => {
+    preencherFim(selectInicio.value, 120); // max 120 min
+  });
+
+  // Botões modal
+  btnCancelar.addEventListener('click', fecharModal);
+  if (closeBtn) closeBtn.addEventListener('click', fecharModal);
+
+  // Confirmar: valida, adiciona evento ao calendário e fecha
+  btnConfirmar.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const nome = (nomeInput?.value || '').trim();
+    const dataIso = modal.dataset.date; // yyyy-mm-dd
+    const inicio = selectInicio?.value;
+    const fim = selectFim?.value;
+    const mensagem = mensagemInput?.value || '';
+
+    if (!nome) { alert('Informe o nome do cliente.'); return; }
+    if (!dataIso) { alert('Data inválida. Tente novamente.'); return; }
+    if (!inicio || !fim) { alert('Escolha horário de início e término.'); return; }
+
+    // montar start e end no formato ISO compatível com FullCalendar
+    // usamos :00 segundos
+    const startIso = `${dataIso}T${inicio}:00`;
+    const endIso = `${dataIso}T${fim}:00`;
+
+    // valida duração <= 120min (double check)
+    const toMinutes = s => {
+      const [hh, mm] = s.split(':').map(Number);
+      return hh * 60 + mm;
+    };
+    if (toMinutes(fim) - toMinutes(inicio) > 120) {
+      alert('A duração máxima permitida é 2 horas.');
+      return;
+    }
+    if (toMinutes(fim) <= toMinutes(inicio)) {
+      alert('Horário de término deve ser depois do início.');
+      return;
+    }
+
+    // cria evento no calendario (temporário)
+    calendar.addEvent({
+      title: nome,
+      start: startIso,
+      end: endIso,
+      extendedProps: { mensagem }
+    });
+
+    log('Agendamento criado:', { nome, startIso, endIso, mensagem });
+    alert(`Agendamento salvo: ${inputData.value} — ${inicio} até ${fim}`);
+    fecharModal();
   });
 
   
-  
-
-
-  // ===============================
-// LÓGICA DO MODAL DE AGENDAMENTO
-// ===============================
-
-const modal = document.getElementById('event-modal');
-const closeModal = document.getElementById('close-modal');
-const form = document.getElementById('event-form');
-let selectedDate = null;
-
-// Quando clicar em um dia do calendário
-calendar.on('dateClick', function (info) {
-  selectedDate = info.dateStr; // guarda a data selecionada
-  modal.style.display = 'flex'; // exibe o modal
-});
-
-// Fechar o modal
-closeModal.onclick = () => (modal.style.display = 'none');
-
-// Fechar modal ao clicar fora
-window.onclick = (e) => {
-  if (e.target === modal) modal.style.display = 'none';
-};
-
-// Ao enviar o formulário
-form.addEventListener('submit', function (e) {
-  e.preventDefault();
-
-  const title = document.getElementById('event-title').value;
-  const description = document.getElementById('event-description').value;
-  const type = document.getElementById('event-type').value;
-
-  if (!title) return alert('Digite um título.');
-
-  // Adiciona o evento no calendário
-  calendar.addEvent({
-    title: `${title} (${type})`,
-    start: selectedDate,
-    extendedProps: { description, type },
+  window.addEventListener('click', (ev) => {
+    if (ev.target === modal) fecharModal();
   });
 
-  // Fecha o modal e limpa os campos
-  form.reset();
-  modal.style.display = 'none';
+  // garantir selects preenchidos se abrir programaticamente
+  preencherInicio();
+  if (selectInicio.value) preencherFim(selectInicio.value, 120);
+
+  // debug
+  log('script do modal/horarios carregado.');
 });

@@ -2,96 +2,89 @@
 <html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AgendClean</title>
-    <link rel="stylesheet" href="src/css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgendClean</title>
 
-    <!--calendar-->
-    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.19/main.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.19/main.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.19/main.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/list@6.1.19/main.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="src/css/style.css" />
 
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.19/main.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.19/main.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.19/main.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/list@6.1.19/main.min.css" rel="stylesheet" />
 </head>
 
 <body>
-    <header>
-        <img src="src/images/AGENDC-removebg-preview.png" alt="logo agendclean png" width="300px">
-        <nav>
-            <ul>
-                <li><a href="#" class="active">Início</a></li>
-                <li><a href="#">Agendamentos</a></li>
-                <li><a href="#">Clientes</a></li>
-                <li><a href="#">Configurações</a></li>
-            </ul>
-        </nav>
-    </header>
+  <header class="app-header">
+    <div class="logo">
+      <img src="src/images/AGENDC-removebg-preview.png" alt="logo" width="200px">
+    </div>
+    <nav class="nav-links">
+      <a href="#">Início</a>
+      <a href="#">Serviços</a>
+      <a href="#">Contato</a>
+    </nav>
+  </header>
 
-    <main>
-        <section class="calendar-section">
-            <h2>Calendário de Agendamentos</h2>
-            <div id="calendar"></div>
+  <main class="app-container">
+    <section class="calendar-section">
+      <h1>Agendamentos</h1>
+      <div id="calendar"></div>
+    </section>
+  </main>
 
-            
-            <!-- Modal de agendamento -->
-            <div id="event-modal" class="modal">
-                <div class="modal-content">
-                    <span id="close-modal" class="close">&times;</span>
-                    <h2>Novo Agendamento</h2>
+  <!-- Modal de Agendamento -->
+  <div id="agendamentoModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Novo Agendamento</h2>
 
-                    <form id="event-form">
-                        <label for="event-title">Título:</label>
-                        <input type="text" id="event-title" placeholder="Ex: Reunião com cliente" required />
+      <form id="formAgendamento">
+        <div class="form-group">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" required>
+        </div>
 
-                        <label for="event-type">Tipo:</label>
-                        <select id="event-type" required>
-                            <option value="presencial">Presencial</option>
-                            <option value="online">Online</option>
-                            <option value="reunião">Reunião</option>
-                            <option value="call">Call</option>
-                        </select>
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required>
+        </div>
 
-                        <label for="event-description">Descrição:</label>
-                        <textarea id="event-description" rows="3" placeholder="Detalhes do agendamento..."></textarea>
+        <div class="form-group">
+          <label for="telefone">Telefone</label>
+          <input type="tel" id="telefone" name="telefone" required placeholder="(00) 00000-0000">
+        </div>
 
-                        <button type="submit">Salvar Agendamento</button>
-                    </form>
-                </div>
-            </div>
-            
+        <div class="form-group">
+          <label for="data">Data</label>
+          <input type="text" id="data" name="data" readonly>
+        </div>
 
-        </section>
+        <div class="form-group">
+          <label for="hora-inicio">Horário de início</label>
+          <select id="hora-inicio" name="hora-inicio" required></select>
+        </div>
 
-        <section class="form-section">
-            <h2>Novo Agendamento</h2>
-            <form id="form-agendamento">
-                <label for="nome">Nome do Cliente:</label>
-                <input type="text" id="nome" name="nome" required />
+        <div class="form-group">
+          <label for="hora-fim">Horário de término</label>
+          <select id="hora-fim" name="hora-fim" required></select>
+        </div>
 
-                <label for="data">Data:</label>
-                <input type="date" id="data" name="data" required />
+        <div class="form-group">
+          <label for="mensagem">Motivo / Observações</label>
+          <textarea id="mensagem" name="mensagem" rows="3" placeholder="Descreva brevemente o motivo do agendamento"></textarea>
+        </div>
 
-                <label for="hora">Hora:</label>
-                <input type="time" id="hora" name="hora" required />
+        <div class="modal-buttons">
+          <button type="button" id="btn-cancelar" class="btn-cancelar">Cancelar</button>
+          <button type="submit" id="btn-confirmar" class="btn-confirmar">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-                <label for="tipo">Tipo de Agendamento:</label>
-                <select id="tipo" name="tipo" required>
-                    <option value="">Selecione</option>
-                    <option value="reuniao">Reunião</option>
-                    <option value="call">Call à distância</option>
-                    <option value="presencial">Presencial</option>
-                </select>
-
-                <label for="descricao">Descrição:</label>
-                <textarea id="descricao" name="descricao" rows="3"></textarea>
-
-                <button type="submit">Salvar Agendamento</button>
-            </form>
-        </section>
-    </main>
-
-    <script type="module" src="src/js/main.js"></script>
+  <script type="module" src="src/js/main.js"></script>
 </body>
 
 </html>
