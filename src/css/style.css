@@ -1,379 +1,262 @@
-/* ===========================
-   AgendClean - style.css
-   (combina layout corporativo + modal)
-   =========================== */
-
-/* ---------- Reset básico ---------- */
+/* ========= RESET ========= */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", Arial, sans-serif;
 }
 
-html,
 body {
-    height: 100%;
+  background-color: #f5f7fa;
+  color: #222;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ---------- Tipografia & fundo ---------- */
-body {
-    font-family: "Inter", "Poppins", Arial, sans-serif;
-    background-color: #f3f5f8;
-    /* tom claro do painel */
-    color: #0b1020;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    line-height: 1.4;
-}
-
-/* ---------- HEADER (top bar) ---------- */
+/* ========= HEADER ========= */
 .app-header {
-    background-color: #0b1b3f;
-    /* azul escuro corporativo */
-    color: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 28px;
-    gap: 12px;
-    box-shadow: 0 2px 8px rgba(11, 27, 63, 0.12);
-    position: sticky;
-    top: 0;
-    z-index: 50;
+  width: 100%;
+  background: #0b1020;
+  color: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
+.app-header .logo img {
+  width: 180px;
+  height: auto;
+}
 
 .nav-links {
-    display: flex;
-    gap: 18px;
-    align-items: center;
+  display: flex;
+  gap: 1.5rem;
 }
 
 .nav-links a {
-    color: #d7def6;
-    text-decoration: none;
-    font-weight: 600;
-    padding: 8px 10px;
-    border-radius: 8px;
-    transition: background 0.15s, color 0.15s;
+  color: #ffffffcc;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
 }
 
 .nav-links a:hover {
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
+  color: #9ed500;
 }
 
-/* ---------- CONTAINER PRINCIPAL ---------- */
+/* ========= MAIN ========= */
 .app-container {
-    display: flex;
-    justify-content: center;
-    padding: 28px;
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
 }
 
-/* Card que contém o calendário */
 .calendar-section {
-    width: 100%;
-    max-width: 1100px;
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 26px;
-    box-shadow: 0 8px 30px rgba(18, 23, 34, 0.06);
-    min-height: 60vh;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Título do painel */
 .calendar-section h1 {
-    margin-bottom: 18px;
-    font-size: 1.35rem;
-    color: #0b1b3f;
-    font-weight: 700;
+  text-align: center;
+  color: #0b1020;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
 }
 
-/* ---------- FULLCALENDAR CUSTOMIZAÇÃO ---------- */
-/* garante que o calendario herde o background claro do card */
+/* ========= FULLCALENDAR ========= */
 #calendar {
-    background: transparent;
+  max-width: 100%;
 }
 
-/* toolbar / título */
 .fc .fc-toolbar-title {
-    color: #0b1b3f !important;
-    font-weight: 700;
-    font-size: 1.1rem;
+  font-size: 1.3rem;
+  color: #0b1020;
 }
 
-/* botões */
-.fc .fc-button {
-    background: #0b1b3f !important;
-    color: #fff !important;
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 8px !important;
-    margin: 10px;
-    padding: 6px 10px !important;
-    font-weight: 600 !important;
+.fc .fc-button-primary {
+  background-color: #0b1020 !important;
+  border: none !important;
+  transition: background 0.3s;
+  margin: 3px;
 }
 
-.fc .fc-button:hover {
-    background: #142b68 !important;
+.fc .fc-button-primary:hover {
+  background-color: #9ed500 !important;
+  color: #0b1020 !important;
 }
 
-/* dia números */
-.fc .fc-daygrid-day-number {
-    color: #0b1b3f !important;
-    font-weight: 600;
+.fc-daygrid-day-number {
+  color: #333;
 }
 
-/* evento padrão */
-.fc .fc-event {
-    border: none !important;
-    border-radius: 8px !important;
-    font-weight: 600;
-    padding: 6px 8px !important;
-}
+/* ========= MODAL ========= */
 
-/* evento tipo "agendado" — cor padrão */
-.fc .fc-event.agendado {
-    background: #9ed500 !important;
-    color: #062033 !important;
-}
-
-/* evento tipo "importante" — cor secundária */
-.fc .fc-event.importante {
-    background: #ffb020 !important;
-    color: #062033 !important;
-}
-
-/* final de semana sutil */
-.fc .fc-day-sat,
-.fc .fc-day-sun {
-    background: rgba(10, 16, 32, 0.02);
-}
-
-/* responsividade do calendario */
-@media (max-width: 900px) {
-    .calendar-section {
-        padding: 18px;
-    }
-
-    .nav-links {
-        display: none;
-    }
-
-    /* simplifica para mobile */
-}
-
-/* ---------- MODAL (overlay) ---------- */
 .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(6, 8, 15, 0.45);
-    backdrop-filter: blur(4px);
-    z-index: 999;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+  display: none;
+  position: fixed;
+  z-index: 999;
+  padding-top: 5%;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(11, 16, 32, 0.65);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease;
 }
 
-/* conteúdo do modal: tom claro para contraste dentro do layout */
+.modal.show {
+  display: flex;
+  opacity: 1;
+}
+
 .modal-content {
-    width: 100%;
-    max-width: 520px;
-    background: #ffffff;
-    color: #0b1020;
-    padding: 22px;
-    border-radius: 12px;
-    box-shadow: 0 18px 50px rgba(5, 10, 20, 0.15);
-    position: relative;
-    animation: modalIn 220ms ease;
+  background-color: #fff;
+  margin: auto;
+  padding: 2rem;
+  border: none;
+  border-radius: 16px;
+  width: 100%;
+
+  max-width: 450px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.25s ease;
+  position: relative;
 }
 
-/* close */
-.modal .close {
-    position: absolute;
-    right: 16px;
-    top: 14px;
-    font-size: 20px;
-    color: #6b7280;
-    cursor: pointer;
+@keyframes fadeIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-/* título do modal */
 .modal-content h2 {
-    font-size: 1.2rem;
-    margin-bottom: 12px;
-    color: #0b1b3f;
-    font-weight: 700;
+  text-align: center;
+  color: #0b1020;
+  margin-bottom: 1.5rem;
 }
 
-/* formulário interno */
+/* ========= FORM ========= */
 .form-group {
-    margin-bottom: 12px;
-    display: flex;
-    flex-direction: column;
+  margin-bottom: 1rem;
+
 }
 
 .form-group label {
-    font-size: 0.85rem;
-    color: #4b5563;
-    margin-bottom: 6px;
-    font-weight: 600;
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: #222;
+   
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #e6e9ee;
-    background: #fff;
-    color: #0b1020;
-    font-size: 0.95rem;
-    transition: box-shadow .12s, border-color .12s;
+  width: 100%;
+  padding: 0.7rem;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    outline: none;
-    border-color: #9ed500;
-    box-shadow: 0 6px 18px rgba(158, 213, 0, 0.12);
+  border-color: #9ed500;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(158, 213, 0, 0.2);
 }
 
-/* textarea */
-.form-group textarea {
-    min-height: 88px;
-    resize: vertical;
-}
-
-/* área de botões do modal */
+/* ========= BOTÕES ========= */
 .modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  gap: 1rem;
 }
 
-/* botões */
-.btn-cancelar {
-    background: transparent;
-    border: 1px solid #e6e9ee;
-    color: #374151;
-    padding: 10px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
+.btn-cancelar,
 .btn-confirmar {
-    background: #0b1b3f;
-    color: #fff;
-    padding: 10px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-    box-shadow: 0 8px 20px rgba(11, 27, 63, 0.12);
+  flex: 1;
+  border: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.btn-confirmar:hover {
-    background: #142b68;
+.btn-cancelar {
+  background: #ccc;
+  color: #222;
 }
 
 .btn-cancelar:hover {
-    border-color: #cbd5e1;
+  background: #bbb;
 }
 
-/* pequenas dicas / helper text */
-.small-note {
-    font-size: 0.82rem;
-    color: #6b7280;
-    margin-top: 6px;
+.btn-confirmar {
+  background: #9ed500;
+  color: #0b1020;
 }
 
-/* animação */
-@keyframes modalIn {
-    from {
-        transform: translateY(-8px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+.btn-confirmar:hover {
+  background: #8acb00;
 }
 
-/* ---------- ADAPTABILIDADE MOBILE ---------- */
-@media (max-width: 520px) {
-    .modal-content {
-        padding: 16px;
-        border-radius: 10px;
-    }
-
-    .modal-buttons {
-        flex-direction: column-reverse;
-        gap: 8px;
-    }
-
-    .btn-cancelar,
-    .btn-confirmar {
-        width: 100%;
-    }
+/* ========= FECHAR MODAL ========= */
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.6rem;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.3s;
 }
 
-/* ---------- UTILS ---------- */
-.hidden {
-    display: none !important;
+.close:hover {
+  color: #000;
 }
 
-.center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* ========= RESPONSIVIDADE ========= */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .calendar-section {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
 }
-
-
-
-#calendar {
-    width: 100%;
-    min-height: 640px; /* ajuste se quiser maior/menor */
-    margin-top: 12px;
-  }
-  
-  /* evita que algum overlay invisível bloqueie o calendário quando modal fechado */
-  .modal {
-    display: none;              /* padrão oculto */
-    pointer-events: none;       /* não bloqueia cliques quando oculto */
-    align-items: center;
-    justify-content: center;
-  }
-  
-  /* quando o modal é visível, a classe .show habilita display e pointer-events */
-  .modal.show {
-    display: flex !important;
-    pointer-events: auto !important;
-  }
-  
-  /* conteúdo do modal */
-  .modal .modal-content {
-    max-width: 520px;
-    width: 100%;
-    background: #fff;
-    color: #0b1020;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 14px 40px rgba(0,0,0,0.12);
-  }
-  
-  /* z-index do calendar para garantir visibilidade */
-  .fc {
-    z-index: 2;
-  }
-  
-  /* z-index do modal acima do calendário */
-  .modal { z-index: 9999; }
-  
-  /* responsivo: menor min-height em telas pequenas */
-  @media (max-width: 720px) {
-    #calendar { min-height: 520px; }
-  }

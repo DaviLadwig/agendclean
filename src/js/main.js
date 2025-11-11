@@ -1,208 +1,240 @@
-// src/js/main.js
-import { Calendar } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import ptLocale from '@fullcalendar/core/locales/pt-br';
+import { Calendar } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import ptLocale from "@fullcalendar/core/locales/pt-br";
+import emailjs from "emailjs-com";
 
-// helper de log
-const log = (...args) => console.log('[agendclean]', ...args);
+const log = (...args) => console.log("[AgendClean]", ...args);
 
-document.addEventListener('DOMContentLoaded', () => {
-  log('DOM pronto — iniciando...');
+document.addEventListener("DOMContentLoaded", () => {
+  log("DOM pronto — iniciando...");
 
-  // elementos principais
-  const calendarEl = document.getElementById('calendar');
-  const modal = document.getElementById('agendamentoModal');
-  const inputData = document.getElementById('data');             // campo data (readonly)
-  const selectInicio = document.getElementById('hora-inicio');   // select de início
-  const selectFim = document.getElementById('hora-fim');         // select de término
-  const nomeInput = document.getElementById('nome');
-  const mensagemInput = document.getElementById('mensagem');
-  const btnConfirmar = document.getElementById('btn-confirmar');
-  const btnCancelar = document.getElementById('btn-cancelar');
-  const closeBtn = modal?.querySelector('.close');
+  const calendarEl = document.getElementById("calendar");
+  const modal = document.getElementById("agendamentoModal");
+  const inputData = document.getElementById("data");
+  const selectInicio = document.getElementById("horaInicio");
+  const selectFim = document.getElementById("horaFim");
+  const nomeInput = document.getElementById("nome");
+  const emailInput = document.getElementById("email");
+  const telefoneInput = document.getElementById("telefone");
+  const motivoInput = document.getElementById("motivo");
+  const btnCancelar = document.querySelector(".btn-cancelar");
+  const btnConfirmar = document.querySelector(".btn-confirmar");
+  const closeBtn = document.querySelector(".close");
 
-  if (!calendarEl) {
-    console.error('Elemento #calendar não encontrado.');
-    return;
-  }
-  if (!modal) {
-    console.error('Modal #agendamentoModal não encontrado.');
+  if (!calendarEl || !modal) {
+    console.error("❌ Elementos principais não encontrados.");
     return;
   }
 
-  // Gera array de horários em incrementos de 30 minutos entre startHour e endHour
+  // ===== GERA HORÁRIOS =====
   function gerarSlots(startHour = 8, endHour = 20, stepMinutes = 30) {
     const slots = [];
     for (let h = startHour; h <= endHour; h++) {
       for (let m = 0; m < 60; m += stepMinutes) {
-        const hh = String(h).padStart(2, '0');
-        const mm = String(m).padStart(2, '0');
-        // não incluir slots exatamente no endHour:30 se endHour==20 e step 30 (ajuste PRN)
         if (h === endHour && m > 0) continue;
+        const hh = String(h).padStart(2, "0");
+        const mm = String(m).padStart(2, "0");
         slots.push(`${hh}:${mm}`);
       }
     }
     return slots;
   }
 
-  // Preenche o select de hora inicial com todos os slots
-  const ALL_SLOTS = gerarSlots(8, 20, 30); // 08:00 .. 20:00 (último início 20:00)
+  const ALL_SLOTS = gerarSlots(8, 20, 30);
+
   function preencherInicio() {
-    selectInicio.innerHTML = '';
-    ALL_SLOTS.forEach(s => {
-      const opt = document.createElement('option');
+    selectInicio.innerHTML = "";
+    ALL_SLOTS.forEach((s) => {
+      const opt = document.createElement("option");
       opt.value = s;
       opt.textContent = s;
       selectInicio.appendChild(opt);
     });
   }
 
-  // Preenche o select de fim com as opções válidas para o início escolhido
-  // maxDurMin = 120 (2 horas)
   function preencherFim(inicioValue, maxDurMin = 120) {
-    selectFim.innerHTML = '';
+    selectFim.innerHTML = "";
     if (!inicioValue) return;
-    // converte hh:mm para minutos desde meia-noite
-    const [ih, im] = inicioValue.split(':').map(Number);
+    const [ih, im] = inicioValue.split(":").map(Number);
     const inicioMin = ih * 60 + im;
-    // possíveis finais: a cada 30min, mínimo 30min após início, máximo inicio + maxDurMin
-    const step = 30;
-    for (let t = inicioMin + step; t <= inicioMin + maxDurMin; t += step) {
+    for (let t = inicioMin + 30; t <= inicioMin + maxDurMin; t += 30) {
       const fh = Math.floor(t / 60);
       const fm = t % 60;
-      if (fh > 23) break;
-      // limite de horário de operação: não permitir fim depois de 22:00 por exemplo (opcional)
-      // if (fh > 22) break;
-      const value = `${String(fh).padStart(2,'0')}:${String(fm).padStart(2,'0')}`;
-      // só adicionar se value estiver presente na lista ALL_SLOTS ou for válido no mesmo dia
-      // (permite fins que não correspondem a início de slot, mas aqui usamos 30min step, então bate)
-      const opt = document.createElement('option');
+      if (fh > 22) break;
+      const value = `${String(fh).padStart(2, "0")}:${String(fm).padStart(2, "0")}`;
+      const opt = document.createElement("option");
       opt.value = value;
       opt.textContent = value;
       selectFim.appendChild(opt);
     }
   }
 
-  // Abre o modal: seta data no campo e preenche selects
-  function abrirModal(dateStr) {
-    // dateStr vem no formato yyyy-mm-dd (ex: 2025-11-06)
-    inputData.value = new Date(dateStr).toLocaleDateString('pt-BR');
-    modal.dataset.date = dateStr; // guarda a data clicada
-    preencherInicio();
-    // define horário inicial default (próximo slot)
-    selectInicio.selectedIndex = 0;
-    preencherFim(selectInicio.value);
-    // mostra o modal (suporta .show css class)
-    modal.classList.add('show');
-    // foco no nome
-    setTimeout(() => { nomeInput?.focus(); }, 120);
-  }
+  // ===== MODAL =====
+function abrirModal(dateStr) {
+  // Corrige o deslocamento de data
+  const partes = dateStr.split("-");
+  const ano = parseInt(partes[0]);
+  const mes = parseInt(partes[1]);
+  const dia = parseInt(partes[2]);
 
-  // Fecha modal limpando dados
+  // Cria a data sem fuso (mantendo o dia exato)
+  const dataLocal = new Date(ano, mes - 1, dia);
+  const dataFormatada = dataLocal.toLocaleDateString("pt-BR");
+
+  inputData.value = dataFormatada;
+  modal.dataset.date = `${ano}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+  
+  preencherInicio();
+  preencherFim(selectInicio.value);
+  modal.classList.add("show");
+  setTimeout(() => nomeInput.focus(), 150);
+}
+
   function fecharModal() {
-    modal.classList.remove('show');
-    formReset();
+    modal.classList.remove("show");
+    nomeInput.value = "";
+    emailInput.value = "";
+    telefoneInput.value = "";
+    motivoInput.value = "";
+    selectInicio.innerHTML = "";
+    selectFim.innerHTML = "";
   }
 
-  function formReset() {
-    nomeInput && (nomeInput.value = '');
-    mensagemInput && (mensagemInput.value = '');
-    selectInicio && (selectInicio.selectedIndex = 0);
-    selectFim && (selectFim.innerHTML = '');
-    delete modal.dataset.date;
-  }
-
-  // Inicializa calendar
+  // ===== CALENDÁRIO =====
   const calendar = new Calendar(calendarEl, {
-    plugins: [ dayGridPlugin, interactionPlugin ],
-    initialView: 'dayGridMonth',
+    plugins: [dayGridPlugin, interactionPlugin],
+    initialView: "dayGridMonth",
     locale: ptLocale,
     selectable: true,
-    height: 'auto',
+    height: "auto",
     headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,dayGridWeek'
+      left: "prev,next today",
+      center: "title",
+      right: "dayGridMonth,dayGridWeek",
     },
-    dateClick: function(info) {
-      log('dateClick:', info.dateStr);
+    dateClick(info) {
       abrirModal(info.dateStr);
-      // força atualização de tamanho (resolve encolhimento ocasional)
-      try { calendar.updateSize(); } catch(e) { /* ignore */ }
     },
-    eventClick: function(info) {
-      // Exemplo: mostrar detalhes (pode abrir outro modal)
+    
+    eventClick(info) {
       const ext = info.event.extendedProps || {};
-      alert(`Evento: ${info.event.title}\nData: ${info.event.start?.toLocaleString()}\n${ext.mensagem ? 'Motivo: '+ext.mensagem : ''}`);
-    }
+      alert(
+        `🗓️ Agendamento:\n\n${info.event.title}\n` +
+        `Data: ${info.event.start?.toLocaleDateString("pt-BR")}\n` +
+        `Horário: ${info.event.start?.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })} - ${info.event.end?.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}\n\n` +
+        (ext.motivo ? "Motivo: " + ext.motivo : "")
+      );
+    },
   });
   calendar.render();
+  
 
-  // Quando usuário muda o inicio, atualizar opções de fim
-  selectInicio.addEventListener('change', () => {
-    preencherFim(selectInicio.value, 120); // max 120 min
+  // ===== EVENTOS =====
+  selectInicio.addEventListener("change", () => {
+    preencherFim(selectInicio.value);
   });
+  btnCancelar.addEventListener("click", fecharModal);
+  closeBtn.addEventListener("click", fecharModal);
 
-  // Botões modal
-  btnCancelar.addEventListener('click', fecharModal);
-  if (closeBtn) closeBtn.addEventListener('click', fecharModal);
-
-  // Confirmar: valida, adiciona evento ao calendário e fecha
-  btnConfirmar.addEventListener('click', (e) => {
+  // ===== CONFIRMAR AGENDAMENTO =====
+  btnConfirmar.addEventListener("click", (e) => {
     e.preventDefault();
 
-    const nome = (nomeInput?.value || '').trim();
-    const dataIso = modal.dataset.date; // yyyy-mm-dd
-    const inicio = selectInicio?.value;
-    const fim = selectFim?.value;
-    const mensagem = mensagemInput?.value || '';
+    const nome = nomeInput.value.trim();
+    const email = emailInput.value.trim();
+    const telefone = telefoneInput.value.trim();
+    const motivo = motivoInput.value.trim();
+    const dataIso = modal.dataset.date;
+    const inicio = selectInicio.value;
+    const fim = selectFim.value;
 
-    if (!nome) { alert('Informe o nome do cliente.'); return; }
-    if (!dataIso) { alert('Data inválida. Tente novamente.'); return; }
-    if (!inicio || !fim) { alert('Escolha horário de início e término.'); return; }
+    if (!nome || !email || !telefone || !inicio || !fim) {
+      alert("⚠️ Preencha todos os campos obrigatórios.");
+      return;
+    }
 
-    // montar start e end no formato ISO compatível com FullCalendar
-    // usamos :00 segundos
     const startIso = `${dataIso}T${inicio}:00`;
     const endIso = `${dataIso}T${fim}:00`;
 
-    // valida duração <= 120min (double check)
-    const toMinutes = s => {
-      const [hh, mm] = s.split(':').map(Number);
-      return hh * 60 + mm;
-    };
-    if (toMinutes(fim) - toMinutes(inicio) > 120) {
-      alert('A duração máxima permitida é 2 horas.');
-      return;
-    }
-    if (toMinutes(fim) <= toMinutes(inicio)) {
-      alert('Horário de término deve ser depois do início.');
-      return;
-    }
-
-    // cria evento no calendario (temporário)
-    calendar.addEvent({
+    const novoEvento = {
       title: nome,
       start: startIso,
       end: endIso,
-      extendedProps: { mensagem }
-    });
+      extendedProps: { email, telefone, motivo },
+    };
 
-    log('Agendamento criado:', { nome, startIso, endIso, mensagem });
-    alert(`Agendamento salvo: ${inputData.value} — ${inicio} até ${fim}`);
+    calendar.addEvent(novoEvento);
+    agendarNotificacaoLocal(novoEvento);
+    alert("✅ Agendamento criado com sucesso!");
     fecharModal();
+
+    // === ENVIO DE EMAIL ===
+    emailjs.init("vUIUDfZ6IwV5nal3I");
+    const templateParams = {
+      to_name: nome,
+      to_email: email,
+      data: inputData.value,
+      hora_inicio: inicio,
+      hora_fim: fim,
+      motivo: motivo,
+      empresa_name: "AgendClean",
+    };
+
+ 
+    emailjs.send('service_loj4n5b', 'template_5et063o', templateParams)
+      .then(() => console.log('✅ E-mail enviado com sucesso'))
+      .catch(err => console.error('❌ Falha ao enviar e-mail:', err));
   });
 
-  
-  window.addEventListener('click', (ev) => {
+  // Fecha modal clicando fora
+  window.addEventListener("click", (ev) => {
     if (ev.target === modal) fecharModal();
   });
 
-  // garantir selects preenchidos se abrir programaticamente
   preencherInicio();
-  if (selectInicio.value) preencherFim(selectInicio.value, 120);
+  preencherFim(selectInicio.value);
 
-  // debug
-  log('script do modal/horarios carregado.');
+  log("Script do calendário carregado.");
 });
+
+/* ======================
+      NOTIFICAÇÕES
+====================== */
+function solicitarPermissaoNotificacoes() {
+  if ("Notification" in window) {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        console.log("🔔 Permissão de notificação concedida");
+      } else {
+        console.log("⚠️ Permissão de notificação negada");
+      }
+    });
+  }
+}
+solicitarPermissaoNotificacoes();
+
+function agendarNotificacaoLocal(evento) {
+  const eventoHora = new Date(evento.start);
+  const agora = new Date();
+  const minutosAntes = 10;
+
+  const diferenca = eventoHora - agora - minutosAntes * 60 * 1000;
+  if (diferenca > 0) {
+    setTimeout(() => {
+      new Notification("🔔 Lembrete de agendamento", {
+        body: `Você tem um compromisso com ${evento.title} às ${eventoHora.toLocaleTimeString(
+          "pt-BR",
+          { hour: "2-digit", minute: "2-digit" }
+        )}.`,
+        icon: "https://cdn-icons-png.flaticon.com/512/1827/1827316.png",
+      });
+    }, diferenca);
+  }
+}

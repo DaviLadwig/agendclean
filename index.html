@@ -39,46 +39,46 @@
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Novo Agendamento</h2>
-
+J
       <form id="formAgendamento">
         <div class="form-group">
           <label for="nome">Nome completo</label>
-          <input type="text" id="nome" name="nome" required>
+          <input type="text" id="nome" required >
         </div>
 
         <div class="form-group">
           <label for="email">E-mail</label>
-          <input type="email" id="email" name="email" required>
+          <input type="email" id="email" required>
         </div>
 
         <div class="form-group">
           <label for="telefone">Telefone</label>
-          <input type="tel" id="telefone" name="telefone" required placeholder="(00) 00000-0000">
+          <input type="tel" id="telefone" required placeholder="(00) 00000-0000">
         </div>
 
         <div class="form-group">
           <label for="data">Data</label>
-          <input type="text" id="data" name="data" readonly>
+          <input type="text" id="data" readonly>
         </div>
 
         <div class="form-group">
-          <label for="hora-inicio">Horário de início</label>
-          <select id="hora-inicio" name="hora-inicio" required></select>
+          <label for="horaInicio">Horário de início</label>
+          <select id="horaInicio" required></select>
         </div>
 
         <div class="form-group">
-          <label for="hora-fim">Horário de término</label>
-          <select id="hora-fim" name="hora-fim" required></select>
+          <label for="horaFim">Horário de término</label>
+          <select id="horaFim" required></select>
         </div>
 
         <div class="form-group">
-          <label for="mensagem">Motivo / Observações</label>
-          <textarea id="mensagem" name="mensagem" rows="3" placeholder="Descreva brevemente o motivo do agendamento"></textarea>
+          <label for="motivo">Motivo / Observações</label>
+          <textarea id="motivo" rows="3" placeholder="Descreva brevemente o motivo do agendamento"></textarea>
         </div>
 
         <div class="modal-buttons">
-          <button type="button" id="btn-cancelar" class="btn-cancelar">Cancelar</button>
-          <button type="submit" id="btn-confirmar" class="btn-confirmar">Confirmar</button>
+          <button type="button" class="btn-cancelar">Cancelar</button>
+          <button type="submit" class="btn-confirmar">Confirmar</button>
         </div>
       </form>
     </div>
@@ -86,5 +86,4 @@
 
   <script type="module" src="src/js/main.js"></script>
 </body>
-
 </html>
