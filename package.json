@@ -1,7 +1,7 @@
-
 {
   "name": "agendclean",
   "version": "1.0.0",
+  "type": "module",
   "description": "Sistema de agendamento AgendClean",
   "scripts": {
     "dev": "vite",
@@ -16,5 +16,8 @@
   },
   "devDependencies": {
     "vite": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
